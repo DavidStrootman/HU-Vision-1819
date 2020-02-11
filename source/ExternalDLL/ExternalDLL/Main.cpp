@@ -10,39 +10,35 @@
 #include "ImageFactory.h"
 #include "DLLExecution.h"
 
-void drawFeatureDebugImage(IntensityImage &image, FeatureMap &features);
-bool executeSteps(DLLExecution * executor);
+void drawFeatureDebugImage(IntensityImage& image, FeatureMap& features);
+bool executeSteps(DLLExecution* executor);
 
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[]) {
 
 	ImageFactory::setImplementation(ImageFactory::DEFAULT);
 	//ImageFactory::setImplementation(ImageFactory::STUDENT);
 
-
-	ImageIO::debugFolder = "D:\\Users\\Rolf\\Downloads\\FaceMinMin";
+	ImageIO::debugFolder = "./FaceMinMin";
 	ImageIO::isInDebugMode = true; //If set to false the ImageIO class will skip any image save function calls
 
+	RGBImage* input = ImageFactory::newRGBImage();
 
-
-
-	RGBImage * input = ImageFactory::newRGBImage();
-	if (!ImageIO::loadImage("D:\\Users\\Rolf\\Downloads\\TestA5.jpg", *input)) {
+	// TODO: Relative path
+	if (!ImageIO::loadImage("../../../testsets/Set A/TestSet Images/child-1.png", *input)) {
 		std::cout << "Image could not be loaded!" << std::endl;
 		system("pause");
 		return 0;
 	}
 
-
 	ImageIO::saveRGBImage(*input, ImageIO::getDebugFileName("debug.png"));
 
-	DLLExecution * executor = new DLLExecution(input);
-
+	DLLExecution* executor = new DLLExecution(input);
 
 	if (executeSteps(executor)) {
 		std::cout << "Face recognition successful!" << std::endl;
 		std::cout << "Facial parameters: " << std::endl;
 		for (int i = 0; i < 16; i++) {
-			std::cout << (i+1) << ": " << executor->facialParameters[i] << std::endl;
+			std::cout << (i + 1) << ": " << executor->facialParameters[i] << std::endl;
 		}
 	}
 
@@ -51,16 +47,7 @@ int main(int argc, char * argv[]) {
 	return 1;
 }
 
-
-
-
-
-
-
-
-
-
-bool executeSteps(DLLExecution * executor) {
+bool executeSteps(DLLExecution* executor) {
 
 	//Execute the four Pre-processing steps
 	if (!executor->executePreProcessingStep1(false)) {
@@ -85,8 +72,6 @@ bool executeSteps(DLLExecution * executor) {
 		return false;
 	}
 	ImageIO::saveIntensityImage(*executor->resultPreProcessingStep4, ImageIO::getDebugFileName("Pre-processing-4.png"));
-
-
 
 	//Execute the localization steps
 	if (!executor->prepareLocalization()) {
@@ -119,8 +104,6 @@ bool executeSteps(DLLExecution * executor) {
 		return false;
 	}
 
-
-
 	//Execute the extraction steps
 	if (!executor->prepareExtraction()) {
 		std::cout << "Extraction preparation failed!" << std::endl;
@@ -142,7 +125,6 @@ bool executeSteps(DLLExecution * executor) {
 		return false;
 	}
 
-
 	//Post processing and representation
 	if (!executor->executePostProcessing()) {
 		std::cout << "Post-processing failed!" << std::endl;
@@ -158,9 +140,9 @@ bool executeSteps(DLLExecution * executor) {
 	return true;
 }
 
-void drawFeatureDebugImage(IntensityImage &image, FeatureMap &features) {
+void drawFeatureDebugImage(IntensityImage& image, FeatureMap& features) {
 	RGB colorRed(244, 67, 54);
-	RGBImage * debug = ImageFactory::newRGBImage(image.getWidth(), image.getHeight());
+	RGBImage* debug = ImageFactory::newRGBImage(image.getWidth(), image.getHeight());
 	ImageIO::intensityToRGB(image, *debug);
 
 	//Nose
@@ -169,7 +151,6 @@ void drawFeatureDebugImage(IntensityImage &image, FeatureMap &features) {
 	Point2D<double> nostrilLeft = features.getFeature(Feature::FEATURE_NOSTRIL_LEFT)[0];
 	Point2D<double> nostrilRight = features.getFeature(Feature::FEATURE_NOSTRIL_RIGHT)[0];
 	Point2D<double> noseBottom = features.getFeature(Feature::FEATURE_NOSE_BOTTOM)[0];
-
 
 	//These (weird) methods can be used to draw debug points
 	HereBeDragons::TriumphInLoveFleshStaysNoFatherReason(*debug, noseLeft, colorRed);
@@ -188,11 +169,9 @@ void drawFeatureDebugImage(IntensityImage &image, FeatureMap &features) {
 	Feature leftEye = features.getFeature(Feature::FEATURE_EYE_LEFT_RECT);
 	Feature rightEye = features.getFeature(Feature::FEATURE_EYE_RIGHT_RECT);
 
-
 	//These (weird) methods can be used to draw debug rects
 	HereBeDragons::AsHisTriumphantPrizeProudOfThisPride(*debug, leftEye[0], leftEye[1], colorRed);
 	HereBeDragons::AsHisTriumphantPrizeProudOfThisPride(*debug, rightEye[0], rightEye[1], colorRed);
-
 
 	//Head
 	Feature headTop = features.getFeature(Feature::FEATURE_HEAD_TOP);
