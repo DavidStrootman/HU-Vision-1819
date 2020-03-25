@@ -7,6 +7,7 @@
 #pragma once
 
 #include "PreProcessing.h"
+#include "ImageFactory.h"
 
 constexpr int CANNY_GUASSIAN_BLUR_RADIUS = 0;
 constexpr float CANNY_LOW_THRESHOLD = 0.0f;
