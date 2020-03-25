@@ -8,6 +8,7 @@
 
 #include "PreProcessing.h"
 #include "ImageFactory.h"
+#include <opencv2\core\core.hpp>
 
 constexpr int CANNY_GUASSIAN_BLUR_RADIUS = 0;
 constexpr float CANNY_LOW_THRESHOLD = 0.0f;
@@ -19,4 +20,6 @@ public:
 	IntensityImage* stepScaleImage(const IntensityImage& image) const;
 	IntensityImage* stepEdgeDetection(const IntensityImage& image) const;
 	IntensityImage* stepThresholding(const IntensityImage& image) const;
+	void gaussianBlur(const IntensityImage& image, IntensityImage& output) const;
+	void convolution(const IntensityImage& image, IntensityImage& output, cv::Mat kernel) const;
 };
