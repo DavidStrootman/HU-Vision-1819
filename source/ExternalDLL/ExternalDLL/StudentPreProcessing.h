@@ -21,5 +21,7 @@ public:
 	IntensityImage* stepEdgeDetection(const IntensityImage& image) const;
 	IntensityImage* stepThresholding(const IntensityImage& image) const;
 	void gaussianBlur(const IntensityImage& image, IntensityImage& output) const;
-	void convolution(const IntensityImage& image, IntensityImage& output, cv::Mat kernel) const;
+
+	// Only 3x3 kernels supported.
+	void convolution(const IntensityImage& image, IntensityImage& output, const int* kernel, int kernelSize = 9) const;
 };

@@ -15,28 +15,7 @@ IntensityImage* StudentPreProcessing::stepEdgeDetection(const IntensityImage& im
 	//////
 
 	IntensityImage* gaussianResultImage = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
-
-	for (size_t i = 0; i < size_t(image.getWidth() * image.getHeight()); i++)
-	{
-		Intensity targetPixel = image.getPixel(i);
-
-		Intensity topLeftPixel = image.getPixel(i - image.getWidth() - 1);
-		Intensity topCenterPixel = image.getPixel(i - image.getWidth());
-		Intensity topRightPixel = image.getPixel(i - image.getWidth() + 1);
-
-		Intensity middleLeftPixel = image.getPixel(i - 1);
-		Intensity middleRightPixel = image.getPixel(i + 1);
-
-		Intensity bottomLeftPixel = image.getPixel(i + image.getWidth() - 1);
-		Intensity bottomCenterPixel = image.getPixel(i + image.getWidth());
-		Intensity bottomRightPixel = image.getPixel(i + image.getWidth() + 1);
-
-		gaussianResultImage->setPixel(i, (topLeftPixel * 2 + topCenterPixel * 4 + topRightPixel * 2
-			+ middleLeftPixel * 4 + targetPixel * 1 + middleRightPixel * 4
-			+ bottomLeftPixel * 2 + bottomCenterPixel * 4 + bottomRightPixel * 2
-			) / 25);
-	}
-
+	gaussianBlur(image, *gaussianResultImage);
 	return gaussianResultImage;
 
 	// Step 2 - Sobel Edge Detector
@@ -62,20 +41,33 @@ IntensityImage* StudentPreProcessing::stepThresholding(const IntensityImage& ima
 
 void StudentPreProcessing::gaussianBlur(const IntensityImage& image, IntensityImage& output) const
 {
-	// Static because we can't use constexpr
-	static uint8_t data[] = { 1,2,1, 2,4,2, 1,2,1 };
-	static cv::Mat kernel = cv::Mat(3, 3, CV_8U, data);
-	convolution(image, output, kernel);
+	constexpr int data[] = { 1,2,1, 2,4,2, 1,2,1 };
+	convolution(image, output, data);
 }
 
-void StudentPreProcessing::convolution(const IntensityImage& image, IntensityImage& output, cv::Mat kernel) const
+void StudentPreProcessing::convolution(const IntensityImage& image, IntensityImage& output, const int* kernel, int kernelSize) const
 {
-	// Origin is top left
-	for (int y = 0; y < image.getHeight(); y++)
+	int kernelTotal = 0;
+	for (int i = 0; i < kernelSize; i++) {
+		kernelTotal += kernel[i];
+	}
+
+	// TODO: Bounds checking
+	for (int i = 0; i < image.getWidth() * image.getHeight(); i++)
 	{
-		for (int x = 0; x < image.getWidth(); x++)
-		{
-			// TODO:
-		}
+		int topLeftPixel = image.getPixel(i - image.getWidth() - 1) * kernel[0];
+		int topCenterPixel = image.getPixel(i - image.getWidth()) * kernel[1];
+		int topRightPixel = image.getPixel(i - image.getWidth() + 1) * kernel[2];
+
+		int middleLeftPixel = image.getPixel(i - 1) * kernel[3];
+		int middleCenterPixel = image.getPixel(i) * kernel[4];
+		int middleRightPixel = image.getPixel(i + 1) * kernel[5];
+
+		int bottomLeftPixel = image.getPixel(i + image.getWidth() - 1) * kernel[6];
+		int bottomCenterPixel = image.getPixel(i + image.getWidth()) * kernel[7];
+		int bottomRightPixel = image.getPixel(i + image.getWidth() + 1) * kernel[8];
+
+		int newValue = topLeftPixel + topCenterPixel + topRightPixel + middleLeftPixel + middleCenterPixel + middleRightPixel + bottomLeftPixel + bottomCenterPixel + bottomRightPixel;
+		output.setPixel(i, newValue / kernelTotal);
 	}
 }
