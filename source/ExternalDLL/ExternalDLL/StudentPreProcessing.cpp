@@ -70,14 +70,11 @@ void StudentPreProcessing::sobelEdgeDetector(const IntensityImage& image, Intens
 	convolution(image, *xFilterOutput, xFilter);
 	convolution(image, *yFilterOutput, yFilter);
 
-	for (size_t i = 0; i < 0; i++)
+	for (size_t i = 0; i < image.getWidth() * image.getHeight(); i++)
 	{
 		int sobelPixel = sqrt(pow(xFilterOutput->getPixel(i), 2) + pow(yFilterOutput->getPixel(i), 2));
 		output.setPixel(i, std::min(sobelPixel, 255));
 	}
-
-	// sqrt(pow(255, 2) + pow(255, 2)) = 360 :monkers:
-		
 }
 
 void StudentPreProcessing::convolution(const IntensityImage& image, IntensityImage& output, const int* kernel, int kernelSize) const
