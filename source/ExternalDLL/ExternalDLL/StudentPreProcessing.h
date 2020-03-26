@@ -8,7 +8,6 @@
 
 #include "PreProcessing.h"
 #include "ImageFactory.h"
-#include <opencv2\core\core.hpp>
 
 constexpr int CANNY_GUASSIAN_BLUR_RADIUS = 0;
 constexpr float CANNY_LOW_THRESHOLD = 0.0f;
