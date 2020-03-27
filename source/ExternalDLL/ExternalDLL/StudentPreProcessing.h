@@ -21,6 +21,8 @@ public:
 	IntensityImage* stepThresholding(const IntensityImage& image) const;
 	void gaussianBlur(const IntensityImage& image, IntensityImage& output) const;
 	void nonMaximumSuppression(const IntensityImage& image,  IntensityImage& output, int* edgeDirections) const;
+	void doubleThreshold(const IntensityImage& image, IntensityImage& output) const;
+
 	void sobelEdgeDetector(const IntensityImage& image, IntensityImage& output, int* directionOutput) const;
 
 	// Only 3x3 kernels supported.

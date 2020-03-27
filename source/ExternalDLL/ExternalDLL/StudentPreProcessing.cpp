@@ -33,19 +33,20 @@ IntensityImage* StudentPreProcessing::stepEdgeDetection(const IntensityImage& im
 
 IntensityImage* StudentPreProcessing::stepThresholding(const IntensityImage& image) const {
 	// Step 4 - Double Threshold
-
+	IntensityImage* doubleThresholdOutput = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
+	doubleThreshold(image, *doubleThresholdOutput);
 	// Step 5 - Hysteresis Thresholding
 
 	// Return copy of image, just for testing.
 
-	IntensityImage* imgCopy = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
+	//IntensityImage* imgCopy = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
 
-	for (size_t i = 0; i < size_t(image.getWidth() * image.getHeight()); i++)
-	{
-		imgCopy->setPixel(i, image.getPixel(i));
-	}
+	//for (size_t i = 0; i < size_t(image.getWidth() * image.getHeight()); i++)
+	//{
+	//	imgCopy->setPixel(i, image.getPixel(i));
+	//}
 	
-	return imgCopy;
+	return doubleThresholdOutput;
 }
 
 void StudentPreProcessing::gaussianBlur(const IntensityImage& image, IntensityImage& output) const
@@ -149,9 +150,27 @@ void StudentPreProcessing::nonMaximumSuppression(const IntensityImage& image, In
 			}
 		}
 	}
-	// 2. If the edge strength of the current pixel is the largest compared to the other pixels in the mask with the same direction
-	// (e.g., a pixel that is pointing in the y - direction will be compared to the pixel above and below it in the vertical axis),
-	// the value will be preserved.Otherwise, the value will be suppressed.
+}
+
+void StudentPreProcessing::doubleThreshold(const IntensityImage& image, IntensityImage& output) const
+{
+
+	for (int i = 1; i < image.getWidth() * image.getHeight(); i++)
+	{
+		int upperBoundThreshold = 15;
+		int lowerBoundThreshold = 10;
+		if (image.getPixel(i) > upperBoundThreshold)
+		{
+			output.setPixel(i, 0);
+		}
+		else if (image.getPixel(i) < lowerBoundThreshold)
+		{
+			output.setPixel(i, 255);
+		}
+		else {
+			output.setPixel(i, 50);
+		}
+	}
 }
 
 void StudentPreProcessing::convolution(const IntensityImage& image, IntensityImage& output, const int* kernel, int kernelSize) const
