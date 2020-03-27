@@ -21,11 +21,13 @@ IntensityImage* StudentPreProcessing::stepEdgeDetection(const IntensityImage& im
 
 	// Step 2 - Sobel Edge Detector
 	IntensityImage* sobelOutput = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
-	int* sobelAngles{ new int[image.getWidth() * image.getHeight()]() };
-	sobelEdgeDetector(*edgeDetectResultImage, *sobelOutput, sobelAngles);
+	int* sobelDirections{ new int[image.getWidth() * image.getHeight()]() };
+	sobelEdgeDetector(*edgeDetectResultImage, sobelOutput, sobelDirections);
 
 	// Step 3 - Non-Maximum Suppression
-	return sobelOutput;
+	IntensityImage* nonMaximumSuppressionOutput = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
+	nonMaximumSuppression(*sobelOutput, nonMaximumSuppressionOutput, sobelDirections);
+	return nonMaximumSuppressionOutput;
 }
 
 IntensityImage* StudentPreProcessing::stepThresholding(const IntensityImage& image) const {
@@ -55,7 +57,7 @@ void StudentPreProcessing::gaussianBlur(const IntensityImage& image, IntensityIm
 	convolution(image, output, kernel);
 }
 
-void StudentPreProcessing::sobelEdgeDetector(const IntensityImage& image, IntensityImage& output, int* angleOutput) const
+void StudentPreProcessing::sobelEdgeDetector(const IntensityImage& image, IntensityImage& output, int* directionOutput) const
 {
 
 	constexpr int xFilter[] = { -1, 0, 1,
@@ -83,35 +85,70 @@ void StudentPreProcessing::sobelEdgeDetector(const IntensityImage& image, Intens
 		output.setPixel(i, std::max(0, std::min(sobelPixel, 255)));
 
 		int sobelDir = abs(int(atan2(yFilterPixel, xFilterPixel)) % 180);
-		
-		if (sobelDir > 157)
-		{
-			angleOutput[i] = 0;
-		}
-		else if (sobelDir > 112)
-		{
-			angleOutput[i] = 135;
-		}
-		else if (sobelDir > 67)
-		{
-			angleOutput[i] = 90;
-		}
-		else if (sobelDir > 22)
-		{
-			angleOutput[i] = 45;
-		}
-		else
-		{
-			angleOutput[i] = 0;
-		}
+		directionOutput[i] = sobelDir;
 	}
 }
 
-void StudentPreProcessing::nonMaximumSuppression(const IntensityImage& image, int* edgeAngles, IntensityImage& output) const
+void StudentPreProcessing::nonMaximumSuppression(const IntensityImage& image, IntensityImage& output, int* edgeDirections ) const
 {
-	// Edge strenght == Edge gradient value
+	// Edge strength == Edge gradient value
 	// 1. Compare the edge strength of the current pixel with the edge strength of the pixel in the positive and negative gradient directions.
-
+	for (int y = 1; y < image.getHeight(); y++)
+	{
+		for (int x = 1; x < image.getWidth(); x++)
+		{
+			int i = x + y * image.getWidth();
+			int targetPixel = image.getPixel(i);
+			if (edgeDirections[i] < 23 || edgeDirections[i] >= 158)
+			{
+				// Horizontal
+				if (targetPixel < image.getPixel(x-1, y) || targetPixel < image.getPixel(x + 1, y))
+				{
+					output.setPixel(i, 0);
+				}
+				else
+				{
+					output.setPixel(i, targetPixel);
+				}
+			}
+			else if (edgeDirections[i] < 68)
+			{
+				// Diagonal top right
+				if (targetPixel < image.getPixel(x - 1, y + 1) || targetPixel < image.getPixel(x + 1, y - 1))
+				{
+					output.setPixel(i, 0);
+				}
+				else
+				{
+					output.setPixel(i, targetPixel);
+				}
+			}
+			else if (edgeDirections[i] < 113)
+			{
+				// Vertical
+				if (targetPixel < image.getPixel(x, y - 1) || targetPixel < image.getPixel(x, y + 1))
+				{
+					output.setPixel(i, 0);
+				}
+				else
+				{
+					output.setPixel(i, targetPixel);
+				}
+			}
+			else
+			{
+				// Diagonal top left
+				if (targetPixel < image.getPixel(x - 1, y - 1) || targetPixel < image.getPixel(x + 1, y + 1))
+				{
+					output.setPixel(i, 0);
+				}
+				else
+				{
+					output.setPixel(i, targetPixel);
+				}
+			}
+		}
+	}
 	// 2. If the edge strength of the current pixel is the largest compared to the other pixels in the mask with the same direction
 	// (e.g., a pixel that is pointing in the y - direction will be compared to the pixel above and below it in the vertical axis),
 	// the value will be preserved.Otherwise, the value will be suppressed.
