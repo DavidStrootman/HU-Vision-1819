@@ -32,19 +32,9 @@ IntensityImage* StudentPreProcessing::stepEdgeDetection(const IntensityImage& im
 }
 
 IntensityImage* StudentPreProcessing::stepThresholding(const IntensityImage& image) const {
-	// Step 4 - Double Threshold
+	// Step 4 - Thresholding
 	IntensityImage* doubleThresholdOutput = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
-	doubleThreshold(image, *doubleThresholdOutput);
-	// Step 5 - Hysteresis Thresholding
-
-	// Return copy of image, just for testing.
-
-	//IntensityImage* imgCopy = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
-
-	//for (size_t i = 0; i < size_t(image.getWidth() * image.getHeight()); i++)
-	//{
-	//	imgCopy->setPixel(i, image.getPixel(i));
-	//}
+	threshold(image, *doubleThresholdOutput);
 	
 	return doubleThresholdOutput;
 }
@@ -152,23 +142,34 @@ void StudentPreProcessing::nonMaximumSuppression(const IntensityImage& image, In
 	}
 }
 
-void StudentPreProcessing::doubleThreshold(const IntensityImage& image, IntensityImage& output) const
+void StudentPreProcessing::threshold(const IntensityImage& image, IntensityImage& output) const
 {
-
-	for (int i = 1; i < image.getWidth() * image.getHeight(); i++)
+	for (int y = 1; y < image.getHeight(); y++)
 	{
-		int upperBoundThreshold = 15;
-		int lowerBoundThreshold = 10;
-		if (image.getPixel(i) > upperBoundThreshold)
+		for (int x = 1; x < image.getWidth(); x++)
 		{
-			output.setPixel(i, 0);
-		}
-		else if (image.getPixel(i) < lowerBoundThreshold)
-		{
-			output.setPixel(i, 255);
-		}
-		else {
-			output.setPixel(i, 50);
+			int upperBoundThreshold = 15;
+			int lowerBoundThreshold = 10;
+			if (image.getPixel(x, y) > upperBoundThreshold)
+			{
+				output.setPixel(x, y, 0);
+			}
+			else if (image.getPixel(x, y) < lowerBoundThreshold)
+			{
+				output.setPixel(x, y, 255);
+			}
+			else {
+				if (output.getPixel(x-1, y-1)	  || output.getPixel(x, y - 1)	   || output.getPixel(x + 1, y - 1) || 
+					output.getPixel(x - 1, y)	  ||							      output.getPixel(x + 1, y)		|| 
+					output.getPixel(x - 1, y + 1) || output.getPixel(x - 1, y - 1) || output.getPixel(x + 1, y + 1))
+				{
+					output.setPixel(x, y, 0);
+				}
+				else
+				{
+					output.setPixel(x, y, 50);
+				}
+			}
 		}
 	}
 }
