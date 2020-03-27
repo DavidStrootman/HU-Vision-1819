@@ -16,17 +16,18 @@ IntensityImage* StudentPreProcessing::stepScaleImage(const IntensityImage& image
 
 IntensityImage* StudentPreProcessing::stepEdgeDetection(const IntensityImage& image) const {
 	// Step 1 - Gaussian Blur (3x3)
-	IntensityImage* edgeDetectResultImage = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
-	gaussianBlur(image, *edgeDetectResultImage);
+	IntensityImage* gaussianResultImage = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
+	gaussianBlur(image, *gaussianResultImage);
 
 	// Step 2 - Sobel Edge Detector
 	IntensityImage* sobelOutput = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
 	int* sobelDirections{ new int[image.getWidth() * image.getHeight()]() };
-	sobelEdgeDetector(*edgeDetectResultImage, sobelOutput, sobelDirections);
+	sobelEdgeDetector(*gaussianResultImage, *sobelOutput, sobelDirections);
 
 	// Step 3 - Non-Maximum Suppression
 	IntensityImage* nonMaximumSuppressionOutput = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
-	nonMaximumSuppression(*sobelOutput, nonMaximumSuppressionOutput, sobelDirections);
+	nonMaximumSuppression(*sobelOutput, *nonMaximumSuppressionOutput, sobelDirections);
+
 	return nonMaximumSuppressionOutput;
 }
 
@@ -53,7 +54,6 @@ void StudentPreProcessing::gaussianBlur(const IntensityImage& image, IntensityIm
 	constexpr int kernel[] = { 1, 2, 1,
 							   2, 4, 2,
 							   1, 2, 1 };
-
 	convolution(image, output, kernel);
 }
 
@@ -184,7 +184,7 @@ void StudentPreProcessing::convolution(const IntensityImage& image, IntensityIma
 			int bottomRightPixel = image.getPixel(x+1, y+1) * kernel[8];
 
 			int newValue = topLeftPixel + topCenterPixel + topRightPixel + middleLeftPixel + middleCenterPixel + middleRightPixel + bottomLeftPixel + bottomCenterPixel + bottomRightPixel;
-			output.setPixel(x, y, newValue / kernelTotal);
+			output.setPixel(x, y, abs(newValue) / kernelTotal);	
 		}
 	}
 }
