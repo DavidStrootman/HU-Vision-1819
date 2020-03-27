@@ -20,7 +20,8 @@ public:
 	IntensityImage* stepEdgeDetection(const IntensityImage& image) const;
 	IntensityImage* stepThresholding(const IntensityImage& image) const;
 	void gaussianBlur(const IntensityImage& image, IntensityImage& output) const;
-	void sobelEdgeDetector(const IntensityImage& image, IntensityImage& output) const;
+	void nonMaximumSuppression(const IntensityImage& image, int* edgeAngles, IntensityImage& output) const;
+	void sobelEdgeDetector(const IntensityImage& image, IntensityImage& output, int* angleOutput) const;
 
 	// Only 3x3 kernels supported.
 	void convolution(const IntensityImage& image, IntensityImage& output, const int* kernel, int kernelSize = 9) const;
