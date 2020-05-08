@@ -35,7 +35,7 @@ IntensityImage* StudentPreProcessing::stepThresholding(const IntensityImage& ima
 	// Step 4 - Thresholding
 	IntensityImage* doubleThresholdOutput = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
 	threshold(image, *doubleThresholdOutput);
-	
+
 	return doubleThresholdOutput;
 }
 
@@ -52,8 +52,8 @@ void StudentPreProcessing::sobelEdgeDetector(const IntensityImage& image, Intens
 {
 
 	constexpr int xFilter[] = { -1, 0, 1,
-							    -2, 0, 2,
-							    -1, 0, 1 };
+								-2, 0, 2,
+								-1, 0, 1 };
 
 	constexpr int yFilter[] = { -1,-2,-1,
 								 0, 0, 0,
@@ -80,7 +80,7 @@ void StudentPreProcessing::sobelEdgeDetector(const IntensityImage& image, Intens
 	}
 }
 
-void StudentPreProcessing::nonMaximumSuppression(const IntensityImage& image, IntensityImage& output, int* edgeDirections ) const
+void StudentPreProcessing::nonMaximumSuppression(const IntensityImage& image, IntensityImage& output, int* edgeDirections) const
 {
 	// Edge strength == Edge gradient value
 	// 1. Compare the edge strength of the current pixel with the edge strength of the pixel in the positive and negative gradient directions.
@@ -93,7 +93,7 @@ void StudentPreProcessing::nonMaximumSuppression(const IntensityImage& image, In
 			if (edgeDirections[i] < 23 || edgeDirections[i] >= 158)
 			{
 				// Horizontal
-				if (targetPixel < image.getPixel(x-1, y) || targetPixel < image.getPixel(x + 1, y))
+				if (targetPixel < image.getPixel(x - 1, y) || targetPixel < image.getPixel(x + 1, y))
 				{
 					output.setPixel(i, 0);
 				}
@@ -159,8 +159,8 @@ void StudentPreProcessing::threshold(const IntensityImage& image, IntensityImage
 				output.setPixel(x, y, 255);
 			}
 			else {
-				if (output.getPixel(x-1, y-1)	  || output.getPixel(x, y - 1)	   || output.getPixel(x + 1, y - 1) || 
-					output.getPixel(x - 1, y)	  ||							      output.getPixel(x + 1, y)		|| 
+				if (output.getPixel(x - 1, y - 1) || output.getPixel(x, y - 1) || output.getPixel(x + 1, y - 1) ||
+					output.getPixel(x - 1, y) || output.getPixel(x + 1, y) ||
 					output.getPixel(x - 1, y + 1) || output.getPixel(x - 1, y - 1) || output.getPixel(x + 1, y + 1))
 				{
 					output.setPixel(x, y, 0);
@@ -191,20 +191,20 @@ void StudentPreProcessing::convolution(const IntensityImage& image, IntensityIma
 	{
 		for (int x = 1; x < image.getWidth(); x++)
 		{
-			int topLeftPixel = image.getPixel(x-1, y-1) * kernel[0];
-			int topCenterPixel = image.getPixel(x, y-1) * kernel[1];
-			int topRightPixel = image.getPixel(x+1,y-1) * kernel[2];
+			int topLeftPixel = image.getPixel(x - 1, y - 1) * kernel[0];
+			int topCenterPixel = image.getPixel(x, y - 1) * kernel[1];
+			int topRightPixel = image.getPixel(x + 1, y - 1) * kernel[2];
 
-			int middleLeftPixel = image.getPixel(x-1, y) * kernel[3];
+			int middleLeftPixel = image.getPixel(x - 1, y) * kernel[3];
 			int middleCenterPixel = image.getPixel(x, y) * kernel[4];
-			int middleRightPixel = image.getPixel(x+1,y) * kernel[5];
+			int middleRightPixel = image.getPixel(x + 1, y) * kernel[5];
 
-			int bottomLeftPixel = image.getPixel(x- 1,y+1) * kernel[6];
-			int bottomCenterPixel = image.getPixel(x, y+1) * kernel[7];
-			int bottomRightPixel = image.getPixel(x+1, y+1) * kernel[8];
+			int bottomLeftPixel = image.getPixel(x - 1, y + 1) * kernel[6];
+			int bottomCenterPixel = image.getPixel(x, y + 1) * kernel[7];
+			int bottomRightPixel = image.getPixel(x + 1, y + 1) * kernel[8];
 
 			int newValue = topLeftPixel + topCenterPixel + topRightPixel + middleLeftPixel + middleCenterPixel + middleRightPixel + bottomLeftPixel + bottomCenterPixel + bottomRightPixel;
-			output.setPixel(x, y, abs(newValue) / kernelTotal);	
+			output.setPixel(x, y, abs(newValue) / kernelTotal);
 		}
 	}
 }
