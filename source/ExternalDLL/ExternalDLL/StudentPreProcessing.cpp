@@ -1,10 +1,12 @@
 #include "StudentPreProcessing.h"
 
 #include <algorithm>
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
+#include <iostream>
 
 #include "ImageFactory.h"
+#include "ImageIO.h"
 
 IntensityImage* StudentPreProcessing::stepToIntensityImage(const RGBImage& image) const {
 	return nullptr;
@@ -65,6 +67,9 @@ void StudentPreProcessing::sobelEdgeDetector(const IntensityImage& image, Intens
 	convolution(image, *xFilterOutput, xFilter);
 	convolution(image, *yFilterOutput, yFilter);
 
+	int max = 0;
+	int* mat = new int[image.getWidth() * image.getHeight()];
+
 	for (int i = 0; i < image.getWidth() * image.getHeight(); i++)
 	{
 		int xFilterPixel = xFilterOutput->getPixel(i);
@@ -72,12 +77,19 @@ void StudentPreProcessing::sobelEdgeDetector(const IntensityImage& image, Intens
 
 		int sobelPixel = sqrt(pow(xFilterPixel, 2) + pow(yFilterPixel, 2));
 
-		// Possibly TODO: try scaling instead of clamping
+		mat[i] = (int)sobelPixel;
+		if (sobelPixel > max) max = sobelPixel;
+
+		// TODO: Delete this when we have scaling
 		output.setPixel(i, std::max(0, std::min(sobelPixel, 255)));
 
-		int sobelDir = abs(int(atan2(yFilterPixel, xFilterPixel)) % 180);
+		int sobelDir = abs(int(atan2(yFilterPixel, xFilterPixel)) * 180 / 3.1415);
 		directionOutput[i] = sobelDir;
 	}
+
+	// TODO: Scaling
+
+	ImageIO::saveIntensityImage(output, "sobelEdgeDetector.png");
 }
 
 void StudentPreProcessing::nonMaximumSuppression(const IntensityImage& image, IntensityImage& output, int* edgeDirections) const
@@ -148,8 +160,8 @@ void StudentPreProcessing::threshold(const IntensityImage& image, IntensityImage
 	{
 		for (int x = 1; x < image.getWidth(); x++)
 		{
-			int upperBoundThreshold = 15;
-			int lowerBoundThreshold = 10;
+			int upperBoundThreshold = 60;
+			int lowerBoundThreshold = 15;
 			if (image.getPixel(x, y) > upperBoundThreshold)
 			{
 				output.setPixel(x, y, 0);
