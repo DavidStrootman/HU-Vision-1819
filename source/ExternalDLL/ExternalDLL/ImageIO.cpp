@@ -16,7 +16,7 @@ using namespace cv;
 
 
 std::string ImageIO::debugFolder = "";
-bool ImageIO::isInDebugMode = true;
+bool ImageIO::isInDebugMode = false;
 
 void mkdirs(std::string path){
 	if (!ImageIO::isInDebugMode) {

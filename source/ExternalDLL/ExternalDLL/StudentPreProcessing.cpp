@@ -30,6 +30,9 @@ IntensityImage* StudentPreProcessing::stepEdgeDetection(const IntensityImage& im
 	IntensityImage* nonMaximumSuppressionOutput = ImageFactory::newIntensityImage(image.getWidth(), image.getHeight());
 	nonMaximumSuppression(*sobelOutput, *nonMaximumSuppressionOutput, sobelDirections);
 
+	delete gaussianResultImage;
+	delete sobelOutput;
+
 	return nonMaximumSuppressionOutput;
 }
 
@@ -90,6 +93,9 @@ void StudentPreProcessing::sobelEdgeDetector(const IntensityImage& image, Intens
 	// TODO: Scaling
 
 	ImageIO::saveIntensityImage(output, "sobelEdgeDetector.png");
+
+	delete xFilterOutput;
+	delete yFilterOutput;
 }
 
 void StudentPreProcessing::nonMaximumSuppression(const IntensityImage& image, IntensityImage& output, int* edgeDirections) const
